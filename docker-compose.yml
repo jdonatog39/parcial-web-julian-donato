@@ -1,0 +1,10 @@
+services:
+  db:
+    image: postgres:16
+    container_name: parcial_db
+    environment:
+      POSTGRES_USER: parcial_user
+      POSTGRES_PASSWORD: parcial123
+      POSTGRES_DB: parcial_db
+    ports:
+      - "5433:5432"
