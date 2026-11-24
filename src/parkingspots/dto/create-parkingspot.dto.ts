@@ -6,6 +6,11 @@ export class CreateParkingspotDto {
     code: string;
     
     @IsNotEmpty()
+    @IsString()
     chargeType: string;
 
+    @IsNotEmpty()
+    @IsUUID()
+    id_supervisor: string;
 }
+

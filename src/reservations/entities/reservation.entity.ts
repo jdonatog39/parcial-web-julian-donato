@@ -38,7 +38,15 @@ export class Reservation {
 
    @ManyToOne(() => ParkingSpot, { onDelete: 'CASCADE' })
    @JoinColumn({ name: 'parking_spot_id' })
-   owner: ParkingSpot;
+   parkingSpot: ParkingSpot;
+
+   @Column({ type: 'uuid' })
+   user_id: string;
+
+
+   @ManyToOne(() => User, { onDelete: 'CASCADE' })
+   @JoinColumn({ name: 'user_id' })
+   user: User;
 
 
 

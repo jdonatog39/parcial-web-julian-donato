@@ -12,4 +12,11 @@ export class CreateReservationDto {
     @IsString()
     vehicle_max_charge: string;
 
+    @IsNotEmpty()
+    @IsUUID()
+    parking_spot_id: string;
+
+    @IsNotEmpty()
+    @IsUUID()
+    user_id: string;
 }
