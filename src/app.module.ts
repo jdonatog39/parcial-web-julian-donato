@@ -10,6 +10,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticationModule, type Duration } from '@nestjs/authentication';      
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 import { AuthorizationModule } from '@nestjs/authorization';
+import { MiddlewareConsumer, NestModule } from '@nestjs/common';  
+import { LoggerMiddleware } from './common/middleware/logger.middleware.js'; 
 
 @Module({
   imports: [
@@ -40,6 +42,7 @@ import { AuthorizationModule } from '@nestjs/authorization';
         allowInMemoryStorage: true,
       }),
     }),
+    
     AuthorizationModule.forRoot(),
     UsersModule,
     RolesModule,
@@ -48,4 +51,8 @@ import { AuthorizationModule } from '@nestjs/authorization';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {            
+  configure(consumer: MiddlewareConsumer) {                  
+    consumer.apply(LoggerMiddleware).forRoutes('*');          
+  }
+}
