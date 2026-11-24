@@ -10,6 +10,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticationModule, type Duration } from '@nestjs/authentication';      
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 import { AuthorizationModule } from '@nestjs/authorization';
+import { ParkingspotsModule } from './parkingspots/parkingspots.module.js';
+import { ReservationsModule } from './reservations/reservations.module.js';
 
 @Module({
   imports: [
@@ -43,7 +45,9 @@ import { AuthorizationModule } from '@nestjs/authorization';
     AuthorizationModule.forRoot(),
     UsersModule,
     RolesModule,
-    AuthModule,                                                      
+    AuthModule,
+    ParkingspotsModule,
+    ReservationsModule,                                                      
   ],
   controllers: [AppController],
   providers: [AppService],
