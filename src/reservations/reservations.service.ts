@@ -5,7 +5,7 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { InjectRepository } from '@nestjs/typeorm';
 import { Role } from '../roles/entities/role.entity.js';
 import {parkingStatus, parkingCharge, ParkingSpot} from '../parkingspots/entities/parkingspot.entity.js';
-import { Repository } from 'typeorm';  
+import { In, Repository } from 'typeorm';  
 import { User } from '../users/entities/user.entity.js';
 import { AssignRolesDto } from '../roles/dto/create-role.dto.js';
 import { RolesService } from '../roles/roles.service.js';
@@ -21,9 +21,9 @@ export class ReservationsService {
     private readonly userRepository: UsersService,
     private readonly parkingSpotRepository: Repository<ParkingSpot>,
   ) {}
-  //crear una reserva, un coductor reserva un puesto para una fecha,indicando la placa y el tipo de carga mas potente que soporta el vehiculo
+
   async create(CreateReservationDto: CreateReservationDto) {
-    const user = await this.userRepository.findOne({ where: { id: CreateReservationDto.user_id }, relations: 'roles' });
+    const user = await this.userRepository.findOne({ where: { id: CreateReservationDto.user_id },relations: { owner: true } });
     if (!user) {
       throw new BadRequestException('Usuario no encontrado');
     }
@@ -46,79 +46,48 @@ export class ReservationsService {
   update(id: number, updateReservationDto: UpdateReservationDto) {
     return `This action updates a #${id} reservation`;
   }
-
-}
-
-
-@Injectable()
-export class VehiclesService {
-  constructor(
-    @InjectRepository(Vehicle)
-    private readonly vehiclesRepository: Repository<Vehicle>,
-    private readonly rolesService: RolesService,
-    private readonly userRepository: UsersService,
-  ) {}
-
-  async create(CreateVehicleDto: CreateVehicleDto) {
-    if (await this.vehiclesRepository.existsBy({plate : CreateVehicleDto.plate })) {
-      throw new ConflictException('placa ya registrada');
+  async findAll(user: User) {
+    if (user.roles.some(role => role.role_name === 'admin')) {
+      return await this.reservationsRepository.find({ relations: ['user', 'parkingSpot'] });
     }
-    const vehicle = this.vehiclesRepository.create(CreateVehicleDto);
-    const saved = await this.vehiclesRepository.save(vehicle);
-    return { message: 'vehiculo registrado con éxito', vehicleId: saved.id };
-
-  }
-
-  async findAll() {
-    return await this.vehiclesRepository.find({select: { id: true, plate: true, type: true,color:true,status:true ,owner_id: true },relations: { owner: true }});
-  }
-
-  async findOne(id: string) {
-    const user = await this.vehiclesRepository.findOne({where: { id },select: { id: true, plate: true, type: true,color:true,status:true ,owner_id: true },relations: { owner: true },});
-    if (!user) {
-      throw new NotFoundException('usuario no encontrado');
+    if (user.roles.some(role => role.role_name === 'supervisor')) {
+      const parkingSpots = await this.parkingSpotRepository.find({ where: { supervisor: { id: user.id } } });
+      const parkingSpotIds = parkingSpots.map(spot => spot.id);
+      return await this.reservationsRepository.find({ where: { parking_spot_id: In(parkingSpotIds) }, relations: ['user', 'parkingSpot'] });
     }
-    return user;
+    return await this.reservationsRepository.find({ where: { user: { id: user.id } }, relations: ['user', 'parkingSpot'] });
   }
-  findById(id: string) {
-    return this.vehiclesRepository.findOne({
-      where: { id },
-      relations: { owner: true },
-    });
-  }
-
-  findByPlateWithPassword(plate: string) {
-    return this.vehiclesRepository.findOne({
-      where: { plate },
-      select: {  id: true, plate: true, type: true,color:true,status:true },
-    });
-  }
-  async registerVehicle(id: string){
-    const vehicle = await this.findOne(id);
-    if (vehicle.status === VehicleStatus.DENTRO) {             // 2. regla de ESTADO
-    throw new BadRequestException('El vehículo ya está dentro'); // 3. throw (400)
+  async updateStatus(id: number, status: 'completed' | 'cancelled', user: User) {
+    if (!user.roles.some(role => role.role_name === 'supervisor')) {
+      throw new BadRequestException('Solo el supervisor puede actualizar el estado de la reserva');
     }
-
-    vehicle.status = VehicleStatus.DENTRO;                     // 4. operar
-    vehicle.entered_at = new Date();
-    await this.vehiclesRepository.save(vehicle);
-    return { message: 'Entrada registrada', entered_at: vehicle.entered_at };
-  }
-
-  async ExitVehicle(id: string){
-    const vehicle = await this.findOne(id);
-    if (vehicle.status === VehicleStatus.FUERA) {             // 2. regla de ESTADO
-    throw new BadRequestException('El vehículo ya está fuera'); // 3. throw (400)
+    const reservation = await this.reservationsRepository.findOne({ where: { id }, relations: ['parkingSpot'] });
+    if (!reservation) {
+      throw new BadRequestException('Reserva no encontrada');
     }
-
-    vehicle.status = VehicleStatus.FUERA;                     // 4. operar
-    vehicle.entered_at = new Date();
-    await this.vehiclesRepository.save(vehicle);
-    return { message: 'Salida registrada' };
+    if (reservation.parkingSpot.supervisor.id !== user.id) {
+      throw new BadRequestException('No tiene permiso para actualizar esta reserva');
+    }
+    if (reservation.status !== 'pending') {
+      throw new BadRequestException('Solo se puede actualizar el estado de reservas pendientes');
+    }
+    reservation.status = status;
+    await this.reservationsRepository.save(reservation);
+    return { message: 'Estado de la reserva actualizado con éxito' };
   }
-  async remove(id: string) {
-    const vehicle = await this.findOne(id);
-    return this.vehiclesRepository.remove(vehicle);
+  async delete(id: number, user: User) {
+    const reservation = await this.reservationsRepository.findOne({ where: { id }, relations: ['user'] });
+    if (!reservation) {
+      throw new BadRequestException('Reserva no encontrada');
+    }
+    if (reservation.user.id !== user.id) {
+      throw new BadRequestException('No tiene permiso para eliminar esta reserva');
+    }
+    if (reservation.status !== 'pending') {
+      throw new BadRequestException('Solo se pueden eliminar reservas pendientes');
+    }
+    await this.reservationsRepository.remove(reservation);
+    return { message: 'Reserva eliminada con éxito' };
   }
 
 }

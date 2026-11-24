@@ -23,7 +23,6 @@ export class ParkingspotsService {
     ) {}
 
   async create(CreateParkingspotDto: CreateParkingspotDto) {
-    //crear un puesto de carga. solo el usuario con rol de admin peude crear puestos , el puesto tiene un codigo unico,un tipo de cargador y un supervisor, un usuario con rol supervisor
     const user = await this.userRepository.findOne({ where: { id: CreateParkingspotDto.id_supervisor }, relations: ['roles'] });
     if (!user || !user.roles.some(role => role.role_name === 'supervisor')) {
       throw new BadRequestException('El supervisor asignado debe tener el rol de supervisor');
@@ -31,10 +30,11 @@ export class ParkingspotsService {
     if (await this.parkingSpotRepository.findOne({ where: { code: CreateParkingspotDto.code } })) {
       throw new ConflictException('Código de puesto de estacionamiento ya registrado');
     }
-
     const parkingSpot = this.parkingSpotRepository.create(CreateParkingspotDto);
     const saved = await this.parkingSpotRepository.save(parkingSpot);
     return { message: 'puesto de estacionamiento registrado con éxito', parkingSpotId: saved.id };
 
   }
+
+
 }

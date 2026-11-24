@@ -7,6 +7,6 @@ import { ParkingSpot } from './entities/parkingspot.entity.js';
 @Module({
   imports: [TypeOrmModule.forFeature([ParkingSpot])],
   controllers: [ParkingspotsController],
-  providers: [ParkingspotsService],
+  providers: [ParkingspotsService,parkingPolicy],
 })
 export class ParkingspotsModule {}

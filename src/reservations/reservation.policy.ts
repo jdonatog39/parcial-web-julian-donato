@@ -9,25 +9,20 @@ export class reservationPolicy implements PolicyBefore<User> {
     return user.roles.some((r) => roles.includes(r.role_name));
   }
   before(user: User | null) {
-    if (user?.roles?.some((r) => r.role_name === 'admin')) return true; 
+    
+  }
+  crearReserva(user: User | null) {
+    return this.hasRole(user, ["supervisor","admin","conductor"]);
   }
 
-
-  list(_user: User | null) {
-    return false;   
+  verReserva(user: User | null) {
+    return this.hasRole(user,["supervisor","admin","conductor"]);
+  }
+  actualizarReserva(user: User | null) {
+    return this.hasRole(user,["supervisor"]);
   }
 
-  assignRoles(_user: User | null) {
-    return false;  
-  }
-  list2(user:User | null){
-    return this.hasRole(user,["operador"]);
-  }
-  //list ()
-
-  read(_user: User | null) { return false; }
-
-  update(_user: User | null) { return false; }
-
-  delete(_user: User | null) { return false; }
+  delete(_user: User | null) { 
+    return this.hasRole(_user, ["conductor"]);
+   }
 }

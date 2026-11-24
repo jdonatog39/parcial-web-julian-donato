@@ -1,12 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, HttpCode  } from '@nestjs/common';
 import { ReservationsService } from './reservations.service.js';
 import { CreateReservationDto } from './dto/create-reservation.dto.js';
 import { UpdateReservationDto } from './dto/update-reservation.dto.js';
-
+import { Reservation } from './entities/reservation.entity.js';
+import { parse } from 'next/dist/build/swc/index.js';
+import { reservationPolicy } from './reservation.policy.js';
+import { Can } from '@nestjs/authorization';
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
 
+  @Can(reservationPolicy, 'crearReserva')
   @Post()
   create(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationsService.create(createReservationDto);

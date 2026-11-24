@@ -9,6 +9,9 @@ export class parkingPolicy implements PolicyBefore<User> {
     if (!user?.roles) return false;
     return user.roles.some((r) => roles.includes(r.role_name));
   }
+  crearPuesto(user: User | null) {
+    return this.hasRole(user, ["admin"]);
+  }
   before(user: User | null) {
     if (user?.roles?.some((r) => r.role_name === 'admin')) return true; 
   }
