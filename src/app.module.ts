@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticationModule, type Duration } from '@nestjs/authentication';      
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 import { AuthorizationModule } from '@nestjs/authorization';
+import { VehiclesModule } from './vehicles/vehicles.module.js';
 
 @Module({
   imports: [
@@ -24,7 +25,7 @@ import { AuthorizationModule } from '@nestjs/authorization';
         password: config.get<string>('DB_PASS'),
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
       }),
     }),
     AuthenticationModule.forRootAsync({                               
@@ -43,7 +44,8 @@ import { AuthorizationModule } from '@nestjs/authorization';
     AuthorizationModule.forRoot(),
     UsersModule,
     RolesModule,
-    AuthModule,                                                      
+    AuthModule,
+    VehiclesModule,                                                      
   ],
   controllers: [AppController],
   providers: [AppService],
