@@ -63,6 +63,7 @@ export class VehiclesService {
     vehicle.status = VehicleStatus.DENTRO;                     // 4. operar
     vehicle.entered_at = new Date();
     await this.vehiclesRepository.save(vehicle);
+    return { message: 'Entrada registrada', entered_at: vehicle.entered_at };
   }
 
   async ExitVehicle(id: string){
@@ -74,21 +75,12 @@ export class VehiclesService {
     vehicle.status = VehicleStatus.FUERA;                     // 4. operar
     vehicle.entered_at = new Date();
     await this.vehiclesRepository.save(vehicle);
+    return { message: 'Salida registrada' };
   }
   async remove(id: string) {
-    const user = await this.findOne(id);
-    return this.userRepository.remove(user);
+    const vehicle = await this.findOne(id);
+    return this.vehiclesRepository.remove(vehicle);
   }
 
-  async asignarRol(id: string, roleNames: string[]) {
-    const user = await this.findOne(id);
-    const roles = await this.rolesService.findByNames(roleNames);
-    if (roles.length !== roleNames.length) {
-      throw new BadRequestException('roles inválidos');
-    }
-    user.roles = roles;
-    await this.userRepository.save(user);
-    return { message: 'Roles asignados' };
-  }
 }
 

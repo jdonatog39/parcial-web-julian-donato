@@ -2,6 +2,10 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { VehiclesService } from './vehicles.service.js';
 import { CreateVehicleDto } from './dto/create-vehicle.dto.js';
 import { UpdateVehicleDto } from './dto/update-vehicle.dto.js';
+import { VehiclePolicy } from './vehicle.policy.js';
+import { Can } from '@nestjs/authorization';
+import { Vehicle } from './entities/vehicle.entity.js';
+import { CurrentUser } from '@nestjs/authentication';
 
 @Controller('vehicles')
 export class VehiclesController {
@@ -12,6 +16,7 @@ export class VehiclesController {
     return this.vehiclesService.create(createVehicleDto);
   }
 
+
   @Get()
   findAll() {
     return this.vehiclesService.findAll();
@@ -19,16 +24,16 @@ export class VehiclesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.vehiclesService.findOne(+id);
+    return this.vehiclesService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateVehicleDto: UpdateVehicleDto) {
-    return this.vehiclesService.update(+id, updateVehicleDto);
+  @Patch(':id/estados')
+  update(@Param('id') id: string, @Body() : ) {
+    return this.vehiclesService.registerVehicle(+id );
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.vehiclesService.remove(+id);
+    return this.vehiclesService.remove(id);
   }
 }
