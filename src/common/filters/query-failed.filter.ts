@@ -15,17 +15,16 @@ export class QueryFailedFilter implements ExceptionFilter {
     if (code === "23505") {
       return response.status(409).json({
         statusCode: 409,
-        error: "conflict",
+        error: " Conflict",
         message: "ya existe un registro con ese valor"
       })
     }
     // TODO 3: para cualquier otro error de la base, responde 500 genérico
     //         { statusCode: 500, message: 'Error interno' }
-    else{
-      return response.status(500).json({
+    
+    return response.status(500).json({
         statusCode: 500,
         message:"error interno"
       })
-    }
   }
 }

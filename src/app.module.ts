@@ -10,6 +10,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthenticationModule, type Duration } from '@nestjs/authentication';      
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 import { AuthorizationModule } from '@nestjs/authorization';
+import { APP_FILTER } from '@nestjs/core';                              
+import { QueryFailedFilter } from './common/filters/query-failed.filter.js';
 
 @Module({
   imports: [
@@ -46,6 +48,6 @@ import { AuthorizationModule } from '@nestjs/authorization';
     AuthModule,                                                      
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,{ provide: APP_FILTER, useClass: QueryFailedFilter }],
 })
 export class AppModule {}
