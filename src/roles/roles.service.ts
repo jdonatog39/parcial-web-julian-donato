@@ -13,9 +13,10 @@ export class RolesService {
     ) {}
 
   async create(dto: CreateRoleDto) {
-    if (await this.repo.existsBy({ role_name: dto.role_name })) {
-      throw new ConflictException('role_name ya existe');
-    }
+    //if (await this.repo.existsBy({ role_name: dto.role_name })) {
+    //  throw new ConflictException('role_name ya existe');
+    //}
+    
     const role = this.repo.create(dto);
     const saved = await this.repo.save(role);
     return { message: 'Rol creado con éxito', roleId: saved.id };
