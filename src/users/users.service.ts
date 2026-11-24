@@ -26,7 +26,6 @@ export class UsersService {
     return { message: 'Usuario registrado con éxito', userId: saved.id };
 
   }
-
   async findAll() {
     return await this.userRepository.find({select: { id: true, email: true, name: true },relations: { roles: true },order: { name: 'ASC' }});
   }
