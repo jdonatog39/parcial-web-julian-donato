@@ -26,7 +26,7 @@ export class ParkingSpot {
 
    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
    created_at: Date;
-
+   
 
    @Column({ type: 'uuid' })
    id_supervisor: string;

@@ -15,22 +15,25 @@ export class ReservationsController {
   create(@Body() createReservationDto: CreateReservationDto) {
     return this.reservationsService.create(createReservationDto);
   }
-
+  @Can(reservationPolicy, 'verReserva')
   @Get()
   findAll() {
     return this.reservationsService.findAll();
   }
 
+  @Can(reservationPolicy, 'verReserva')
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(+id);
   }
 
+  @Can(reservationPolicy, 'actualizarReserva')
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateReservationDto: UpdateReservationDto) {
     return this.reservationsService.update(+id, updateReservationDto);
   }
 
+  @Can(reservationPolicy, 'delete')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.reservationsService.remove(+id);
